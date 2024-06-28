@@ -52,6 +52,106 @@ sudo fdisk -l
 sudo fdisk /dev/xvdb
 ![image](./Screenshots/partitioned.png)
 
-Perform the above steps for /dev/xvdc & /dev/xvdd
+Repeat the above steps for /dev/xvdc & /dev/xvdd
 
 ![image](./Screenshots/partitionscreated.png)
+
+Install lvm2 package using 
+```
+sudo yum install lvm2
+```
+Run 
+```
+sudo lvmdiskscan
+```
+ command to check for available partitions.
+
+ **LVM2 (Logical Volume Manager 2)** is a system that allows you to manage disk storage in a more flexible and powerful way compared to traditional partitioning methods. Here's a simple breakdown of what LVM2 does and why it's useful:
+
+**Key Concepts**
+
+**`Physical Volumes (PVs):`**
+These are your actual physical hard drives or partitions.
+Think of them as the raw storage building blocks.
+
+**`Volume Groups (VGs):`**
+These are created by combining multiple physical volumes into a single, larger pool of storage.
+
+Imagine combining several Lego blocks into one big block.
+
+**`Logical Volumes (LVs):`**
+These are the actual "partitions" you use to store data, created from the storage pool of a volume group.
+You can think of them as flexible containers inside the big Lego block.
+
+**Why Use LVM2?**
+
+**`Flexibility:`**
+You can easily resize logical volumes without worrying about the underlying physical layout.
+For example, if you need more space for your photos, you can increase the size of the logical volume where they are stored without having to move data around.
+
+**`Easier Disk Management:`**
+Adding new disks to your system is simpler. You can just add the new disk as a physical volume and extend your volume group, increasing the available storage pool.
+
+**`Snapshots:`**
+You can take snapshots of your logical volumes, which are useful for backups and quickly recovering from errors.
+Efficient Use of Space:
+
+Instead of having a fixed-size partition, you can allocate space as needed. This means you don't have to guess how much space each partition will need in the future.
+
+**Real-Life Example**
+
+Imagine you have two physical hard drives, each 500GB. You can use LVM2 to combine them into a single 1TB volume group. Then, you can create logical volumes for different purposes, such as one for your operating system, one for your photos, and one for your music. If you later buy another 500GB hard drive, you can easily add it to the volume group, increasing your total storage to 1.5TB without having to move any data around.
+
+**Basic Commands**
+
+Initialize a disk for use by LVM:
+```
+sudo pvcreate /dev/sdb
+sudo pvcreate /dev/sdc
+```
+
+Create a volume group from the initialized disks:
+```
+sudo vgcreate my_volume_group /dev/sdb /dev/sdc
+```
+
+Create a logical volume from the volume group:
+```
+sudo lvcreate -n my_logical_volume -L 300G my_volume_group
+```
+Format the logical volume:
+```
+sudo mkfs.ext4 /dev/my_volume_group/my_logical_volume
+```
+
+Mount the logical volume:
+```
+sudo mkdir /mnt/my_storage
+sudo mount /dev/my_volume_group/my_logical_volume /mnt/my_storage
+```
+
+Use **`pvcreate utility`** to mark each of 3 disks as physical volumes (PVs) to be used by LVM
+
+```
+sudo pvcreate /dev/xvdb1
+sudo pvcreate /dev/xvdc1
+sudo pvcreate /dev/xvdd1
+```
+
+Verify that your Physical volume has been created successfully by running 
+```
+sudo pvs
+```
+![image](./Screenshots/pvs.png)
+
+Use **`vgcreate utility`** to add all 3 PVs to a volume group (VG). Name the VG webdata-vg
+
+```
+sudo vgcreate webdata-vg /dev/xvdb1 /dev/xvdc1 /dev/xvdd1
+```
+
+Verify that your VG has been created successfully by running 
+```
+sudo vgs
+```
+![image](./Screenshots/vgs.png)
