@@ -155,3 +155,53 @@ Verify that your VG has been created successfully by running
 sudo vgs
 ```
 ![image](./Screenshots/vgs.png)
+
+Use **`lvcreate utility`** to create 3 logical volumes. apps-lv (Use half of the PV size), and logs-lv Use the remaining space of the PV size. NOTE: apps-lv will be used to store data for the Website while, logs-lv will be used to store data for logs.
+
+Ensure there are 3 Logical Volumes. `lv-opt` `lv-apps`, and `lv-logs` 
+```
+sudo lvcreate -n lv-opt -L 9.5G webdata-vg
+sudo lvcreate -n lv-apps -L 9.5G webdata-vg
+sudo lvcreate -n lv-logs -L 8.0G webdata-vg
+```
+![image](./Screenshots/lvscreated.png)
+
+Create mount points on /mnt directory for the logical volumes as follow:
+
+Mount `lv-apps on /mnt/apps` – To be used by webservers
+
+Mount `lv-logs on /mnt/logs` – To be used by webserver logs
+
+Mount `lv-opt on /mnt/opt` – To be used by Jenkins server in project 8.
+
+Install NFS server, configure it to start on reboot and make sure it is u and running
+
+Verify the entire setup 
+```
+sudo vgdisplay -v #view complete setup - VG, PV, and LV
+```
+Instead of formatting the disks as `ext4`, you will have to format them as `xfs`
+
+**`xfs`**: XFS is a robust, scalable, and high-performance file system suitable for handling large files and large-scale storage needs. It offers advanced features such as metadata journaling, online defragmentation, and resizing, making it an excellent choice for enterprise and high-performance computing environments.
+```
+sudo mkfs -t xfs /dev/webdata-vg/apps-lv
+sudo mkfs -t xfs /dev/webdata-vg/logs-lv
+sudo mkfs -t xfs /dev/webdata-vg/opt-lv
+```
+
+![image](./Screenshots/xfsformatting.png)
+
+Create mount points on /mnt directory for the logical volumes as follow:
+```
+Mount lv-apps on /mnt/apps – To be used by webservers
+Mount lv-logs on /mnt/logs – To be used by webserver logs
+Mount lv-opt on /mnt/opt – To be used by Jenkins server in Project 8
+```
+```
+sudo mkdir -p /mnt
+cd mnt
+ls
+sudo mkdir apps logs opt
+```
+
+![IMAGE](./Screenshots/dir.png)
